@@ -4,7 +4,7 @@ With this extension, you can easily search files by its name and open them in th
 
 
 
-![gif1](1.gif)
+![gif1](https://github.com/nancex/vscode-search-files/blob/main/1.gif)
 
 
 
