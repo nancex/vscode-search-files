@@ -3,8 +3,8 @@
   "displayName": "Search Files",
   "icon": "image/icon.png",
   "publisher": "nancex",
-  "description": "This extension allows you to search for files by their names in the workspace.",
-  "version": "0.1.0",
+  "description": "Search files by their names in the workspace.",
+  "version": "0.1.1",
   "engines": {
     "vscode": "^1.101.0"
   },
@@ -30,6 +30,7 @@
     "views": {
       "file-searcher": [
         {
+          "icon": "",
           "id": "search-files.file-searcher.view",
           "name": "",
           "type": "webview"

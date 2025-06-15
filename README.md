@@ -1,6 +1,6 @@
 ## Features
 
-With this extension, you can easily search files by its name and open them in the editor.
+With this extension, you can easily search files by their names and open them in the editor.
 
 
 
