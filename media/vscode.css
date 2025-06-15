@@ -1,0 +1,101 @@
+/* media/vscode.css */
+
+body {
+    padding: 0 10px; /* Remove vertical padding to allow sticky header to work correctly */
+    color: var(--vscode-editor-foreground);
+    background-color: var(--vscode-sideBar-background);
+}
+
+#search-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 0;
+    /* Sticky header styles */
+    position: sticky;
+    top: 0;
+    background-color: var(--vscode-sideBar-background);
+    z-index: 1;
+}
+
+#search-input {
+    flex-grow: 1; /* Allow input to take up available space */
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 5px 8px;
+    border: 1px solid var(--vscode-input-border);
+    background-color: var(--vscode-input-background);
+    color: var(--vscode-input-foreground);
+    border-radius: 2px;
+}
+
+#search-input:focus {
+    outline: 1px solid var(--vscode-focusBorder);
+}
+
+.search-controls {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.control-button {
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 3px;
+    font-family: var(--vscode-font-family);
+    font-size: 12px;
+    line-height: 1;
+    border: 1px solid transparent;
+    color: var(--vscode-foreground);
+    background-color: transparent;
+    user-select: none; /* Prevent text selection */
+}
+
+.control-button:hover {
+    background-color: var(--vscode-toolbar-hoverBackground);
+}
+
+.control-button.active {
+    background-color: var(--vscode-inputOption-activeBackground);
+    border: 1px solid var(--vscode-inputOption-activeBorder);
+    color: var(--vscode-inputOption-activeForeground);
+}
+
+#results-container {
+    margin-top: 5px;
+}
+
+.result-item {
+    padding: 6px 2px;
+    cursor: pointer;
+    border-radius: 3px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid transparent; /* Reserve space for click border */
+}
+
+.result-item:hover {
+    background-color: var(--vscode-list-hoverBackground);
+}
+
+/* Style for when an item is clicked */
+.result-item.clicked {
+    background-color: var(--vscode-list-activeSelectionBackground);
+    color: var(--vscode-list-activeSelectionForeground);
+    border: 1px solid var(--vscode-focusBorder);
+}
+
+.result-item.clicked .result-description {
+    color: var(--vscode-list-activeSelectionForeground);
+}
+
+.result-label {
+    font-weight: bold;
+}
+
+.result-description {
+    font-size: 0.9em;
+    color: var(--vscode-descriptionForeground);
+    padding-top: 2px;
+}
