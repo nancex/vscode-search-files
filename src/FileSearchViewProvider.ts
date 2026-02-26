@@ -35,35 +35,93 @@ export class FileSearchViewProvider implements vscode.WebviewViewProvider {
                             webviewView.webview.postMessage({ type: 'results', results: [] });
                             return;
                         }
-                        
-                        // Fetch all files and then filter them in the extension host
-                        // to ensure consistent filtering logic across all platforms.
+                        const includeFiles = data.includeFiles !== false;
+                        const includeFolders = data.includeFolders !== false;
+
+                        const matcher = createNameMatcher(data.value, !!data.useRegex, !!data.caseSensitive);
+                        if (!matcher) {
+                            webviewView.webview.postMessage({ type: 'results', results: [] });
+                            return;
+                        }
+
                         const allFiles = await vscode.workspace.findFiles('**/*');
-                        
-                        const searchResults = allFiles.filter(file => {
-                            const fileName = path.basename(file.fsPath);
-                            
-                            if (data.useRegex) {
-                                try {
-                                    const regex = new RegExp(data.value, data.caseSensitive ? '' : 'i');
-                                    return regex.test(fileName);
-                                } catch (e) {
-                                    // Invalid regex, don't filter anything
-                                    return false;
-                                }
-                            } else {
-                                if (data.caseSensitive) {
-                                    return fileName.includes(data.value);
-                                } else {
-                                    return fileName.toLowerCase().includes(data.value.toLowerCase());
-                                }
-                            }
-                        }).map(file => {
+                        const fileEntries = allFiles.map(file => {
+                            const description = vscode.workspace.asRelativePath(file);
+                            const normalizedDescription = normalizeRelativePath(description);
                             return {
+                                type: 'file',
                                 uri: file.toString(),
                                 label: path.basename(file.fsPath),
-                                description: vscode.workspace.asRelativePath(file)
+                                description,
+                                relativePath: normalizedDescription,
+                                parentPath: getParentPath(normalizedDescription)
                             };
+                        });
+
+                        const folderEntriesByPath = new Map<string, { type: 'folder'; label: string; description: string; relativePath: string; children: Array<{ type: 'file' | 'folder'; label: string; description: string; uri?: string }> }>();
+
+                        for (const fileEntry of fileEntries) {
+                            const parts = fileEntry.relativePath.split('/').filter(Boolean);
+                            for (let i = 0; i < parts.length - 1; i++) {
+                                const relativePath = parts.slice(0, i + 1).join('/');
+                                if (!folderEntriesByPath.has(relativePath)) {
+                                    folderEntriesByPath.set(relativePath, {
+                                        type: 'folder',
+                                        label: parts[i],
+                                        description: relativePath,
+                                        relativePath,
+                                        children: []
+                                    });
+                                }
+                            }
+                        }
+
+                        for (const folder of folderEntriesByPath.values()) {
+                            const childFolders = Array.from(folderEntriesByPath.values())
+                                .filter(candidate => getParentPath(candidate.relativePath) === folder.relativePath)
+                                .map(candidate => ({
+                                    type: 'folder' as const,
+                                    label: candidate.label,
+                                    description: candidate.description
+                                }));
+
+                            const childFiles = fileEntries
+                                .filter(fileEntry => fileEntry.parentPath === folder.relativePath)
+                                .map(fileEntry => ({
+                                    type: 'file' as const,
+                                    label: fileEntry.label,
+                                    description: fileEntry.description,
+                                    uri: fileEntry.uri
+                                }));
+
+                            folder.children = [...childFolders, ...childFiles].sort((a, b) => a.label.localeCompare(b.label));
+                        }
+
+                        const fileResults = includeFiles
+                            ? fileEntries.filter(fileEntry => matcher(fileEntry.label)).map(fileEntry => ({
+                                type: 'file',
+                                uri: fileEntry.uri,
+                                label: fileEntry.label,
+                                description: fileEntry.description
+                            }))
+                            : [];
+
+                        const folderResults = includeFolders
+                            ? Array.from(folderEntriesByPath.values())
+                                .filter(folder => matcher(folder.label))
+                                .map(folder => ({
+                                    type: 'folder',
+                                    label: folder.label,
+                                    description: folder.description,
+                                    children: folder.children
+                                }))
+                            : [];
+
+                        const searchResults = [...folderResults, ...fileResults].sort((a, b) => {
+                            if (a.label === b.label) {
+                                return a.description.localeCompare(b.description);
+                            }
+                            return a.label.localeCompare(b.label);
                         });
                         
                         webviewView.webview.postMessage({ type: 'results', results: searchResults });
@@ -104,12 +162,50 @@ export class FileSearchViewProvider implements vscode.WebviewViewProvider {
                     </div>
                 </div>
 
+                <div id="filter-options">
+                    <label class="checkbox-option">
+                        <input type="checkbox" id="include-files" checked>
+                        <span>Files</span>
+                    </label>
+                    <label class="checkbox-option">
+                        <input type="checkbox" id="include-folders" checked>
+                        <span>Folders</span>
+                    </label>
+                </div>
+
                 <div id="results-container"></div>
 
                 <script nonce="${nonce}" src="${scriptUri}"></script>
             </body>
             </html>`;
     }
+}
+
+function createNameMatcher(searchTerm: string, useRegex: boolean, caseSensitive: boolean): ((name: string) => boolean) | undefined {
+    if (useRegex) {
+        try {
+            const regex = new RegExp(searchTerm, caseSensitive ? '' : 'i');
+            return (name: string) => regex.test(name);
+        } catch {
+            return undefined;
+        }
+    }
+
+    if (caseSensitive) {
+        return (name: string) => name.includes(searchTerm);
+    }
+
+    const lowered = searchTerm.toLowerCase();
+    return (name: string) => name.toLowerCase().includes(lowered);
+}
+
+function normalizeRelativePath(relativePath: string): string {
+    return relativePath.replace(/\\/g, '/');
+}
+
+function getParentPath(relativePath: string): string {
+    const index = relativePath.lastIndexOf('/');
+    return index === -1 ? '' : relativePath.slice(0, index);
 }
 
 function getNonce() {
