@@ -36,8 +36,18 @@
           "type": "webview"
         }
       ]
-    }
-  },
+    },
+	"configuration": {
+		"title": "Search Files",
+		"properties": {
+			"file-searcher.openAsPreview": {
+				"type": "boolean",
+				"default": true,
+				"description": "Open files in preview mode."
+			}
+		}
+	}
+},
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",

@@ -71,9 +71,14 @@ export class FileSearchViewProvider implements vscode.WebviewViewProvider {
                     }
                 case 'openFile':
                     {
+					    const config = vscode.workspace.getConfiguration("file-searcher");
+						const open_as_preview = config.get("openAsPreview", true);
                         const uri = vscode.Uri.parse(data.uri);
                         vscode.workspace.openTextDocument(uri).then(doc => {
-                            vscode.window.showTextDocument(doc);
+                            vscode.window.showTextDocument(doc, {
+								preview: open_as_preview,
+								preserveFocus: true
+							});
                         });
                         break;
                     }
