@@ -10,12 +10,35 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 0;
+    padding: 10px 0 6px 0;
     /* Sticky header styles */
     position: sticky;
     top: 0;
     background-color: var(--vscode-sideBar-background);
     z-index: 1;
+}
+
+#filter-options {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-bottom: 8px;
+    position: sticky;
+    top: 40px;
+    background-color: var(--vscode-sideBar-background);
+    z-index: 1;
+}
+
+.checkbox-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    user-select: none;
+}
+
+.checkbox-option input {
+    margin: 0;
 }
 
 #search-input {
@@ -77,6 +100,56 @@ body {
 
 .result-item:hover {
     background-color: var(--vscode-list-hoverBackground);
+}
+
+.folder-item {
+    cursor: default;
+}
+
+.folder-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.folder-caret {
+    width: 12px;
+    line-height: 1.3;
+    color: var(--vscode-descriptionForeground);
+}
+
+.folder-children {
+    display: none;
+    margin-left: 18px;
+    margin-top: 4px;
+}
+
+.folder-item.expanded .folder-children {
+    display: block;
+}
+
+.folder-child-item {
+    padding: 4px 2px;
+    border-radius: 3px;
+}
+
+.folder-child-item.file-child {
+    cursor: pointer;
+}
+
+.folder-child-item.file-child:hover {
+    background-color: var(--vscode-list-hoverBackground);
+}
+
+.folder-child-item.clicked {
+    background-color: var(--vscode-list-activeSelectionBackground);
+    color: var(--vscode-list-activeSelectionForeground);
+    border: 1px solid var(--vscode-focusBorder);
+}
+
+.folder-child-item.clicked .result-description {
+    color: var(--vscode-list-activeSelectionForeground);
 }
 
 /* Style for when an item is clicked */
